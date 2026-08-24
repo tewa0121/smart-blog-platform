@@ -1,21 +1,20 @@
 // server/controllers/postController.js
-// ⭐ Handles the logic for blog posts ⭐
+// ⭐ Handles the logic for blog posts + AI features ⭐
 
 const Post = require('../models/Post');
+const { generateSummary, generateTags } = require('../services/aiService');
 
 // CREATE a new post (Protected)
 const createPost = async (req, res) => {
     try {
         const { title, content, summary, tags } = req.body;
-        const author_id = req.userId; // From the JWT middleware
+        const author_id = req.userId;
 
         if (!title || !content) {
             return res.status(400).json({ error: 'Title and content are required' });
         }
 
         const postId = await Post.createPost(title, content, author_id, summary, tags);
-        
-        // Fetch the newly created post to return it
         const newPost = await Post.getPostById(postId);
         
         res.status(201).json({ 
@@ -64,7 +63,6 @@ const updatePost = async (req, res) => {
         const { title, content, summary, tags } = req.body;
         const userId = req.userId;
 
-        // First, check if the post exists and belongs to the user
         const existingPost = await Post.getPostById(postId);
         if (!existingPost) {
             return res.status(404).json({ error: 'Post not found' });
@@ -93,7 +91,6 @@ const deletePost = async (req, res) => {
         const postId = req.params.id;
         const userId = req.userId;
 
-        // First, check if the post exists and belongs to the user
         const existingPost = await Post.getPostById(postId);
         if (!existingPost) {
             return res.status(404).json({ error: 'Post not found' });
@@ -127,11 +124,74 @@ const getMyPosts = async (req, res) => {
     }
 };
 
+// ----- 🆕 AI FEATURES (Added below) -----
+
+// AI: Generate a summary for a post
+const generateSummaryForPost = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.userId;
+
+        const post = await Post.getPostById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        if (post.author_id !== userId) {
+            return res.status(403).json({ error: 'You are not the author of this post' });
+        }
+
+        const summary = await generateSummary(post.content);
+        if (!summary) {
+            return res.status(500).json({ error: 'AI service failed to generate summary' });
+        }
+
+        await Post.updatePost(postId, post.title, post.content, summary, post.tags);
+
+        res.json({ summary });
+
+    } catch (error) {
+        console.error('Generate summary error:', error);
+        res.status(500).json({ error: 'Server error while generating summary' });
+    }
+};
+
+// AI: Generate tags for a post
+const generateTagsForPost = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.userId;
+
+        const post = await Post.getPostById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        if (post.author_id !== userId) {
+            return res.status(403).json({ error: 'You are not the author of this post' });
+        }
+
+        const tags = await generateTags(post.content);
+        if (!tags) {
+            return res.status(500).json({ error: 'AI service failed to generate tags' });
+        }
+
+        await Post.updatePost(postId, post.title, post.content, post.summary, tags);
+
+        res.json({ tags });
+
+    } catch (error) {
+        console.error('Generate tags error:', error);
+        res.status(500).json({ error: 'Server error while generating tags' });
+    }
+};
+
+// ----- EXPORT ALL FUNCTIONS -----
 module.exports = {
     createPost,
     getAllPosts,
     getPostById,
     updatePost,
     deletePost,
-    getMyPosts
+    getMyPosts,
+    generateSummaryForPost,
+    generateTagsForPost
 };
