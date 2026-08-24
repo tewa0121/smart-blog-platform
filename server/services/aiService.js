@@ -8,12 +8,13 @@ const groq = new Groq({
 const generateSummary = async (content) => {
     console.log('🔥🔥🔥 AI SUMMARIZE FUNCTION WAS CALLED! 🔥🔥🔥');
     console.log('📝 Content length:', content.length, 'characters');
+    console.log('🔑 Using API key:', process.env.GROQ_API_KEY ? '✅ Key exists' : '❌ Key missing');
     
     try {
         console.log('🔍 AI: Sending request to Groq for summarization...');
         
         const response = await groq.chat.completions.create({
-            model: "openai/gpt-oss-120b",  // ← REPLACED with supported model
+            model: "mixtral-8x7b-32768",  // ← Try this model
             messages: [
                 {
                     role: "system",
@@ -48,7 +49,7 @@ const generateTags = async (content) => {
         console.log('🔍 AI: Sending request to Groq for tag generation...');
         
         const response = await groq.chat.completions.create({
-            model: "openai/gpt-oss-120b",  // ← REPLACED with supported model
+            model: "mixtral-8x7b-32768",  // ← Try this model
             messages: [
                 {
                     role: "system",
