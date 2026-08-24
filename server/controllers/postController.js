@@ -1,10 +1,6 @@
-// server/controllers/postController.js
-// ⭐ Handles the logic for blog posts + AI features ⭐
-
 const Post = require('../models/Post');
 const { generateSummary, generateTags } = require('../services/aiService');
 
-// CREATE a new post (Protected)
 const createPost = async (req, res) => {
     try {
         const { title, content, summary, tags } = req.body;
@@ -28,7 +24,6 @@ const createPost = async (req, res) => {
     }
 };
 
-// GET all posts (Public)
 const getAllPosts = async (req, res) => {
     try {
         const posts = await Post.getAllPosts();
@@ -39,7 +34,6 @@ const getAllPosts = async (req, res) => {
     }
 };
 
-// GET a single post by ID (Public)
 const getPostById = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -56,7 +50,6 @@ const getPostById = async (req, res) => {
     }
 };
 
-// UPDATE a post (Protected - only the author)
 const updatePost = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -85,7 +78,6 @@ const updatePost = async (req, res) => {
     }
 };
 
-// DELETE a post (Protected - only the author)
 const deletePost = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -112,7 +104,6 @@ const deletePost = async (req, res) => {
     }
 };
 
-// GET posts by the logged-in user (for Dashboard) - Protected
 const getMyPosts = async (req, res) => {
     try {
         const userId = req.userId;
@@ -124,9 +115,8 @@ const getMyPosts = async (req, res) => {
     }
 };
 
-// ----- 🆕 AI FEATURES (Added below) -----
+// ===== AI FEATURES =====
 
-// AI: Generate a summary for a post
 const generateSummaryForPost = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -155,7 +145,6 @@ const generateSummaryForPost = async (req, res) => {
     }
 };
 
-// AI: Generate tags for a post
 const generateTagsForPost = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -184,18 +173,8 @@ const generateTagsForPost = async (req, res) => {
     }
 };
 
-// ----- EXPORT ALL FUNCTIONS -----
-module.exports = {
-    createPost,
-    getAllPosts,
-    getPostById,
-    updatePost,
-    deletePost,
-    getMyPosts,
-    generateSummaryForPost,
-    generateTagsForPost
-};
-// TEST: Fake summary (bypasses AI)
+// ===== TEST ENDPOINT (Fake AI - Bypasses Groq) =====
+
 const fakeSummary = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -209,13 +188,24 @@ const fakeSummary = async (req, res) => {
             return res.status(403).json({ error: 'You are not the author of this post' });
         }
 
-        // Fake summary
-        const summary = "This is a fake summary generated without AI.";
+        const summary = "This is a fake summary generated without AI. If you see this, your routes and authentication are working correctly!";
         await Post.updatePost(postId, post.title, post.content, summary, post.tags);
 
-        res.json({ summary });
+        res.json({ summary, fake: true });
     } catch (error) {
         console.error('Fake summary error:', error);
         res.status(500).json({ error: 'Server error' });
     }
+};
+
+module.exports = {
+    createPost,
+    getAllPosts,
+    getPostById,
+    updatePost,
+    deletePost,
+    getMyPosts,
+    generateSummaryForPost,
+    generateTagsForPost,
+    fakeSummary
 };
