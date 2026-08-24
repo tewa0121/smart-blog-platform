@@ -1,6 +1,3 @@
-// server/routes/postRoutes.js
-// ⭐ Defines the API endpoints for blog posts + AI features ⭐
-
 const express = require('express');
 const authenticate = require('../middleware/auth');
 const {
@@ -11,23 +8,27 @@ const {
     deletePost,
     getMyPosts,
     generateSummaryForPost,
-    generateTagsForPost
+    generateTagsForPost,
+    fakeSummary
 } = require('../controllers/postController');
 
 const router = express.Router();
 
-// --- Public Routes (No token required) ---
-router.get('/', getAllPosts);                // GET /api/posts
-router.get('/:id', getPostById);             // GET /api/posts/5
+// Public Routes
+router.get('/', getAllPosts);
+router.get('/:id', getPostById);
 
-// --- Protected Routes (Token required) ---
-router.post('/', authenticate, createPost);  // POST /api/posts
-router.get('/me/posts', authenticate, getMyPosts); // GET /api/posts/me/posts
-router.put('/:id', authenticate, updatePost); // PUT /api/posts/5
-router.delete('/:id', authenticate, deletePost); // DELETE /api/posts/5
+// Protected Routes
+router.post('/', authenticate, createPost);
+router.get('/me/posts', authenticate, getMyPosts);
+router.put('/:id', authenticate, updatePost);
+router.delete('/:id', authenticate, deletePost);
 
-// --- 🆕 AI Routes (Protected) ---
-router.post('/:id/summarize', authenticate, generateSummaryForPost); // POST /api/posts/5/summarize
-router.post('/:id/tags', authenticate, generateTagsForPost);          // POST /api/posts/5/tags
+// AI Routes
+router.post('/:id/summarize', authenticate, generateSummaryForPost);
+router.post('/:id/tags', authenticate, generateTagsForPost);
+
+// TEST Route - Bypasses AI
+router.post('/:id/fake-summarize', authenticate, fakeSummary);
 
 module.exports = router;
