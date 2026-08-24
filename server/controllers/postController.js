@@ -195,3 +195,27 @@ module.exports = {
     generateSummaryForPost,
     generateTagsForPost
 };
+// TEST: Fake summary (bypasses AI)
+const fakeSummary = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.userId;
+
+        const post = await Post.getPostById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        if (post.author_id !== userId) {
+            return res.status(403).json({ error: 'You are not the author of this post' });
+        }
+
+        // Fake summary
+        const summary = "This is a fake summary generated without AI.";
+        await Post.updatePost(postId, post.title, post.content, summary, post.tags);
+
+        res.json({ summary });
+    } catch (error) {
+        console.error('Fake summary error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
