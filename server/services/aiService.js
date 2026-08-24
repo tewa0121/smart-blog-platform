@@ -1,14 +1,10 @@
 // server/services/aiService.js
-// ⭐ Handles all AI operations using Groq (FREE) ⭐
-
 const Groq = require('groq-sdk');
 
-// Initialize Groq with your API key from .env
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
 });
 
-// Generate a summary of the content
 const generateSummary = async (content) => {
     console.log('🔥🔥🔥 AI SUMMARIZE FUNCTION WAS CALLED! 🔥🔥🔥');
     console.log('📝 Content length:', content.length, 'characters');
@@ -44,7 +40,6 @@ const generateSummary = async (content) => {
     }
 };
 
-// Generate tags for the content
 const generateTags = async (content) => {
     console.log('🏷️🏷️🏷️ AI TAGS FUNCTION WAS CALLED! 🏷️🏷️🏷️');
     console.log('📝 Content length:', content.length, 'characters');
