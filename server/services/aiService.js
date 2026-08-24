@@ -1,6 +1,6 @@
-// server/services/aiService.js
 const Groq = require('groq-sdk');
 
+// Initialize Groq
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
 });
@@ -8,13 +8,13 @@ const groq = new Groq({
 const generateSummary = async (content) => {
     console.log('🔥🔥🔥 AI SUMMARIZE FUNCTION WAS CALLED! 🔥🔥🔥');
     console.log('📝 Content length:', content.length, 'characters');
-    console.log('🔑 Using API key:', process.env.GROQ_API_KEY ? '✅ Key exists' : '❌ Key missing');
+    console.log('🔑 API Key exists:', process.env.GROQ_API_KEY ? '✅ YES' : '❌ NO');
     
     try {
         console.log('🔍 AI: Sending request to Groq for summarization...');
         
         const response = await groq.chat.completions.create({
-            model: "mixtral-8x7b-32768",  // ← Try this model
+            model: "mixtral-8x7b-32768",
             messages: [
                 {
                     role: "system",
@@ -44,12 +44,13 @@ const generateSummary = async (content) => {
 const generateTags = async (content) => {
     console.log('🏷️🏷️🏷️ AI TAGS FUNCTION WAS CALLED! 🏷️🏷️🏷️');
     console.log('📝 Content length:', content.length, 'characters');
+    console.log('🔑 API Key exists:', process.env.GROQ_API_KEY ? '✅ YES' : '❌ NO');
     
     try {
         console.log('🔍 AI: Sending request to Groq for tag generation...');
         
         const response = await groq.chat.completions.create({
-            model: "mixtral-8x7b-32768",  // ← Try this model
+            model: "mixtral-8x7b-32768",
             messages: [
                 {
                     role: "system",
