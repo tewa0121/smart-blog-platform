@@ -10,6 +10,9 @@ const groq = new Groq({
 
 // Generate a summary of the content
 const generateSummary = async (content) => {
+    console.log('🔥🔥🔥 AI SUMMARIZE FUNCTION WAS CALLED! 🔥🔥🔥');
+    console.log('📝 Content length:', content.length, 'characters');
+    
     try {
         console.log('🔍 AI: Sending request to Groq for summarization...');
         
@@ -43,6 +46,9 @@ const generateSummary = async (content) => {
 
 // Generate tags for the content
 const generateTags = async (content) => {
+    console.log('🏷️🏷️🏷️ AI TAGS FUNCTION WAS CALLED! 🏷️🏷️🏷️');
+    console.log('📝 Content length:', content.length, 'characters');
+    
     try {
         console.log('🔍 AI: Sending request to Groq for tag generation...');
         
