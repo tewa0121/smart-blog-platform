@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
@@ -23,13 +22,36 @@ const Dashboard = () => {
     fetchPosts();
   }, []);
 
-  if (loading) return <div className="text-center py-10">Loading posts...</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <span>Loading posts...</span>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-8">📚 All Blog Posts</h1>
+    <div className="fade-in">
+      <div className="dashboard-header mb-8">
+        <h1 className="dashboard-title">
+          📚 <span>All Blog Posts</span>
+        </h1>
+        <p className="dashboard-subtitle">
+          Discover amazing stories from our community
+        </p>
+      </div>
+
       {posts.length === 0 ? (
-        <p className="text-gray-500">No posts yet. {token && <span>Create your first post!</span>}</p>
+        <div className="empty-state">
+          <div className="empty-state-icon">📝</div>
+          <h2 className="empty-state-title">No posts yet</h2>
+          <p className="empty-state-text">
+            {token 
+              ? 'Be the first to create a blog post!' 
+              : 'Login to start writing your own blog posts.'}
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
