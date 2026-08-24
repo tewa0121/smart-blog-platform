@@ -1,4 +1,3 @@
-// src/pages/PostDetail.jsx
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -36,6 +35,7 @@ const PostDetail = () => {
       await fetchPost();
     } catch (error) {
       console.error('Summarization failed', error);
+      alert('Failed to generate summary. Make sure your Groq API key is set.');
     } finally {
       setGeneratingSummary(false);
     }
@@ -49,6 +49,7 @@ const PostDetail = () => {
       await fetchPost();
     } catch (error) {
       console.error('Tag generation failed', error);
+      alert('Failed to generate tags. Make sure your Groq API key is set.');
     } finally {
       setGeneratingTags(false);
     }
@@ -61,40 +62,64 @@ const PostDetail = () => {
       navigate('/');
     } catch (error) {
       console.error('Delete failed', error);
+      alert('Failed to delete post');
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading post...</div>;
-  if (!post) return <div className="text-center py-10 text-red-500">Post not found</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <span>Loading post...</span>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-2xl font-bold text-red-500">Post not found</h2>
+        <Link to="/" className="text-blue-600 hover:underline mt-4 inline-block">
+          ← Back to home
+        </Link>
+      </div>
+    );
+  }
 
   const isAuthor = user && post.author_id === user.id;
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-      <p className="text-gray-600 mb-4">
-        By {post.author_name} • {new Date(post.created_at).toLocaleDateString()}
-      </p>
+    <div className="post-detail-container fade-in">
+      <h1 className="post-detail-title">{post.title}</h1>
+      
+      <div className="post-detail-meta">
+        By <strong>{post.author_name}</strong>
+        • {new Date(post.created_at).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        })}
+      </div>
 
       {isAuthor && (
         <div className="flex flex-wrap gap-3 mb-6">
-          <Link to={`/edit/${post.id}`} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+          <Link to={`/edit/${post.id}`} className="action-btn action-btn-edit">
             ✏️ Edit
           </Link>
-          <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          <button onClick={handleDelete} className="action-btn action-btn-delete">
             🗑️ Delete
           </button>
           <button
             onClick={handleGenerateSummary}
             disabled={generatingSummary}
-            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+            className="action-btn action-btn-ai"
           >
             {generatingSummary ? '⏳ Generating...' : '🤖 AI Summary'}
           </button>
           <button
             onClick={handleGenerateTags}
             disabled={generatingTags}
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
+            className="action-btn action-btn-tags"
           >
             {generatingTags ? '⏳ Generating...' : '🏷️ AI Tags'}
           </button>
@@ -102,22 +127,20 @@ const PostDetail = () => {
       )}
 
       {post.summary && (
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
-          <p className="text-gray-700"><strong>📌 Summary:</strong> {post.summary}</p>
+        <div className="ai-summary-box">
+          <strong>📌 AI Summary:</strong> {post.summary}
         </div>
       )}
 
       {post.tags && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="tags-container">
           {post.tags.split(',').map((tag, i) => (
-            <span key={i} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-              #{tag.trim()}
-            </span>
+            <span key={i} className="tag">#{tag.trim()}</span>
           ))}
         </div>
       )}
 
-      <div className="prose max-w-none bg-white p-6 rounded-lg shadow whitespace-pre-wrap">
+      <div className="post-detail-content">
         {post.content}
       </div>
     </div>
