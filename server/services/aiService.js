@@ -1,5 +1,5 @@
 // server/services/aiService.js
-// ⭐ BACKEND: Handles all AI operations using Groq (FREE) ⭐
+// ⭐ Handles all AI operations using Groq (FREE) ⭐
 
 const Groq = require('groq-sdk');
 
@@ -11,8 +11,10 @@ const groq = new Groq({
 // Generate a summary of the content
 const generateSummary = async (content) => {
     try {
+        console.log('🔍 AI: Sending request to Groq for summarization...');
+        
         const response = await groq.chat.completions.create({
-            model: "llama3-70b-8192", // Free Meta Llama model
+            model: "llama3-70b-8192",
             messages: [
                 {
                     role: "system",
@@ -27,9 +29,14 @@ const generateSummary = async (content) => {
             max_tokens: 150,
         });
 
+        console.log('✅ AI: Summary generated successfully!');
         return response.choices[0].message.content.trim();
     } catch (error) {
-        console.error('AI Summarization Error:', error.message);
+        console.error('❌ AI Summarization Error DETAILS:', {
+            message: error.message,
+            status: error.status,
+            response: error.response?.data || 'No response data'
+        });
         return null;
     }
 };
@@ -37,6 +44,8 @@ const generateSummary = async (content) => {
 // Generate tags for the content
 const generateTags = async (content) => {
     try {
+        console.log('🔍 AI: Sending request to Groq for tag generation...');
+        
         const response = await groq.chat.completions.create({
             model: "llama3-70b-8192",
             messages: [
@@ -53,9 +62,14 @@ const generateTags = async (content) => {
             max_tokens: 50,
         });
 
+        console.log('✅ AI: Tags generated successfully!');
         return response.choices[0].message.content.trim();
     } catch (error) {
-        console.error('AI Tag Generation Error:', error.message);
+        console.error('❌ AI Tag Generation Error DETAILS:', {
+            message: error.message,
+            status: error.status,
+            response: error.response?.data || 'No response data'
+        });
         return null;
     }
 };
