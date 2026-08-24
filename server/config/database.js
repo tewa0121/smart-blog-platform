@@ -57,7 +57,7 @@ const initializeDatabase = async () => {
 
         console.log('✅ SUCCESS: All database tables are ready!');
     } catch (error) {
-        console.error('❌ ERROR: Database failed to start:', error.message);
+        console.error('❌ ERROR: Database failed to start:', error);
         process.exit(1);
     }
 };
