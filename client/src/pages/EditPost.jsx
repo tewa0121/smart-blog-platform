@@ -1,4 +1,3 @@
-// src/pages/EditPost.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -9,6 +8,7 @@ const EditPost = () => {
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,44 +28,65 @@ const EditPost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setUpdating(true);
+    setError('');
     try {
       await api.put(`/posts/${id}`, { title, content });
       navigate(`/post/${id}`);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update post');
-      setLoading(false);
+      setUpdating(false);
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <span>Loading post...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">✏️ Edit Post</h2>
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+    <div className="form-container fade-in" style={{ maxWidth: '800px' }}>
+      <h2 className="form-title">✏️ Edit Post</h2>
+      <p className="form-subtitle">Update your blog post</p>
+      
+      {error && <div className="form-error">{error}</div>}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Post Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-3 border rounded text-xl"
-          required
-        />
-        <textarea
-          placeholder="Write your blog content here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full p-3 border rounded h-64"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-yellow-500 text-white px-6 py-3 rounded hover:bg-yellow-600 disabled:opacity-50"
+        <div>
+          <label className="form-label">Post Title</label>
+          <input
+            type="text"
+            placeholder="Enter a catchy title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="form-input"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="form-label">Content</label>
+          <textarea
+            placeholder="Write your blog content here..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="form-input"
+            style={{ minHeight: '300px', resize: 'vertical' }}
+            required
+          />
+        </div>
+        
+        <button 
+          type="submit" 
+          className="form-submit" 
+          disabled={updating}
+          style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
         >
-          {loading ? 'Updating...' : '💾 Update Post'}
+          {updating ? 'Updating...' : '💾 Update Post'}
         </button>
       </form>
     </div>
