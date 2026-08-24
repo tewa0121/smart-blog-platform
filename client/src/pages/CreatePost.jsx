@@ -1,4 +1,3 @@
-// src/pages/CreatePost.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -13,6 +12,7 @@ const CreatePost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
       const res = await api.post('/posts', { title, content });
       navigate(`/post/${res.data.post.id}`);
@@ -23,30 +23,38 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">📝 Create New Post</h2>
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+    <div className="form-container fade-in" style={{ maxWidth: '800px' }}>
+      <h2 className="form-title">📝 Create New Post</h2>
+      <p className="form-subtitle">Share your thoughts with the world</p>
+      
+      {error && <div className="form-error">{error}</div>}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Post Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-3 border rounded text-xl"
-          required
-        />
-        <textarea
-          placeholder="Write your blog content here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full p-3 border rounded h-64"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
+        <div>
+          <label className="form-label">Post Title</label>
+          <input
+            type="text"
+            placeholder="Enter a catchy title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="form-input"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="form-label">Content</label>
+          <textarea
+            placeholder="Write your blog content here..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="form-input"
+            style={{ minHeight: '300px', resize: 'vertical' }}
+            required
+          />
+        </div>
+        
+        <button type="submit" className="form-submit" disabled={loading}>
           {loading ? 'Publishing...' : '🚀 Publish Post'}
         </button>
       </form>
