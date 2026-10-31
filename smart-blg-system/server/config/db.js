@@ -73,6 +73,10 @@ const tables = [
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
   )`,
+    `CREATE TABLE IF NOT EXISTS settings (
+    setting_key VARCHAR(60) PRIMARY KEY,
+    setting_value VARCHAR(255) NOT NULL
+  )`,
 ];
 
 const roles = [
@@ -113,7 +117,10 @@ async function initDB() {
   for (const c of categories) {
     await pool.query('INSERT IGNORE INTO categories (category_name) VALUES (?)', [c]);
   }
-
+  // 4b. Seed settings
+  await pool.query(
+    "INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('comments_enabled', 'true')"
+  );
   // 5. Seed default admin
   const [existing] = await pool.query('SELECT user_id FROM users WHERE email = ?', [
     process.env.ADMIN_EMAIL,

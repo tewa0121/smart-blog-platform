@@ -22,11 +22,40 @@ exports.getReport = asyncHandler(async (req, res) => {
      WHERE p.status = 'Published' GROUP BY p.post_id, p.title ORDER BY comments DESC LIMIT 5`
   );
 
+  // Recent activity feed (new users, post changes, comments)
+  const [newUsers] = await pool.query(
+    `SELECT u.full_name AS actor, r.role_name, u.created_at AS at
+     FROM users u JOIN roles r ON u.role_id = r.role_id ORDER BY u.created_at DESC LIMIT 10`
+  );
+  const [recentPosts] = await pool.query(
+    `SELECT p.post_id, p.title, p.status, u.full_name AS actor, p.updated_at AS at
+     FROM posts p JOIN users u ON p.user_id = u.user_id ORDER BY p.updated_at DESC LIMIT 10`
+  );
+  const [recentComments] = await pool.query(
+    `SELECT c.post_id, p.title, u.full_name AS actor, c.created_at AS at
+     FROM comments c JOIN users u ON c.user_id = u.user_id JOIN posts p ON c.post_id = p.post_id
+     ORDER BY c.created_at DESC LIMIT 10`
+  );
+
+  const recent = [
+    ...newUsers.map((x) => ({ type: 'user', actor: x.actor, text: `joined as ${x.role_name}`, at: x.at })),
+    ...recentPosts.map((x) => ({
+      type: 'post', actor: x.actor, post_id: x.post_id,
+      text: `${x.status === 'Published' ? 'published' : 'saved'} "${x.title}" (${x.status})`, at: x.at,
+    })),
+    ...recentComments.map((x) => ({
+      type: 'comment', actor: x.actor, post_id: x.post_id, text: `commented on "${x.title}"`, at: x.at,
+    })),
+  ]
+    .sort((a, b) => new Date(b.at) - new Date(a.at))
+    .slice(0, 10);
+
   res.json({
     totals: { users: users.total, posts: posts.total, comments: comments.total },
     usersByRole,
     postsByStatus,
     postsByCategory,
     topPosts,
+    recent,
   });
 });

@@ -1,6 +1,7 @@
 const { pool } = require('../config/db');
 const asyncHandler = require('../utils/asyncHandler');
 const { createNotification } = require('./notificationController');
+const { commentsEnabled } = require('./settingsController');
 
 exports.getComments = asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
@@ -23,6 +24,9 @@ exports.getMyComments = asyncHandler(async (req, res) => {
 });
 
 exports.addComment = asyncHandler(async (req, res) => {
+  if (!(await commentsEnabled()))
+    return res.status(403).json({ message: 'Comments are turned off by the administrator' });
+
   const text = (req.body.comment_text || '').trim();
   if (!text) return res.status(400).json({ message: 'Comment cannot be empty' });
 
