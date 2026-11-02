@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import Sidebar from '../components/common/Sidebar';
 import Avatar from '../components/common/Avatar';
+import ThemeToggle from '../components/common/ThemeToggle';
 import NotificationBell from '../components/notifications/NotificationBell';
 
 export default function DashboardLayout() {
@@ -17,6 +18,7 @@ export default function DashboardLayout() {
           <Link to="/home" className="text-sm font-medium text-indigo-600 hover:underline">← View blog</Link>
 
           <div className="ml-auto flex items-center gap-4">
+            <ThemeToggle />
             <NotificationBell />
             <Avatar to="/dashboard/profile" />
           </div>
