@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import Avatar from './Avatar';
+import ThemeToggle from './ThemeToggle';
 import NotificationBell from '../notifications/NotificationBell';
 
 export default function Navbar() {
@@ -24,6 +25,7 @@ export default function Navbar() {
         </form>
 
         <div className="ml-auto flex items-center gap-3">
+          <ThemeToggle />
           {user ? (
             <>
               <NotificationBell />
