@@ -4,7 +4,14 @@ require('dotenv').config();
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
 
-// Pool used by all controllers (connects lazily, after initDB creates the database)
+// Common SSL configuration required by Aiven
+const sslConfig = {
+  ssl: {
+    rejectUnauthorized: false, // Set to true if you want strict certificate validation
+  },
+};
+
+// Pool used by all controllers
 const pool = mysql.createPool({
   host: DB_HOST,
   port: Number(DB_PORT),
@@ -14,6 +21,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   charset: 'utf8mb4',
+  ...sslConfig, // Added SSL support for Aiven
 });
 
 const tables = [
@@ -73,7 +81,8 @@ const tables = [
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
   )`,
-    `CREATE TABLE IF NOT EXISTS settings (
+  
+  `CREATE TABLE IF NOT EXISTS settings (
     setting_key VARCHAR(60) PRIMARY KEY,
     setting_value VARCHAR(255) NOT NULL
   )`,
@@ -90,17 +99,22 @@ const roles = [
 const categories = ['Education', 'Technology', 'Health', 'News', 'Business'];
 
 async function initDB() {
-  // 1. Create the database if it does not exist
-  const conn = await mysql.createConnection({
-    host: DB_HOST,
-    port: Number(DB_PORT),
-    user: DB_USER,
-    password: DB_PASSWORD,
-  });
-  await conn.query(
-    `CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
-  );
-  await conn.end();
+  // 1. Try to create the database if it does not exist (Optional on managed clouds like Aiven)
+  try {
+    const conn = await mysql.createConnection({
+      host: DB_HOST,
+      port: Number(DB_PORT),
+      user: DB_USER,
+      password: DB_PASSWORD,
+      ...sslConfig,
+    });
+    await conn.query(
+      `CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+    );
+    await conn.end();
+  } catch (err) {
+    console.log('Note: Skipped database creation (managed cloud databases like Aiven usually require pre-existing databases). Using existing database.');
+  }
 
   // 2. Create all tables
   for (const sql of tables) await pool.query(sql);
@@ -117,10 +131,12 @@ async function initDB() {
   for (const c of categories) {
     await pool.query('INSERT IGNORE INTO categories (category_name) VALUES (?)', [c]);
   }
+  
   // 4b. Seed settings
   await pool.query(
     "INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('comments_enabled', 'true')"
   );
+  
   // 5. Seed default admin
   const [existing] = await pool.query('SELECT user_id FROM users WHERE email = ?', [
     process.env.ADMIN_EMAIL,
